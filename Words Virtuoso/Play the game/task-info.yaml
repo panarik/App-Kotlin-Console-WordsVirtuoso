@@ -1,0 +1,743 @@
+type: edu
+files:
+- name: src/wordsvirtuoso/Main.kt
+  visible: true
+  text: |
+    package wordsvirtuoso
+
+    fun main() {
+        println("Hello World!")
+    }
+  learner_created: false
+- name: test/WordsVirtuosoTest.kt
+  visible: false
+  text: |
+    import org.hyperskill.hstest.dynamic.DynamicTest
+    import org.hyperskill.hstest.stage.StageTest
+    import org.hyperskill.hstest.testcase.CheckResult
+    import org.hyperskill.hstest.testing.TestedProgram
+    import java.io.File
+
+    class WordsVirtuosoTest : StageTest<Any>() {
+        private val wordFiles = mapOf(
+            "somewords.txt" to "stove\nKILOS\nalong\nkites\nartis\nthorn\nflags\njonty\nglift\ninvar" +
+                    "\nsteal\nburnt\nrains\nvelar\nafter\ncives\ntrove\ndebag\npaiks\nyoung\nshaft" +
+                    "\nbinks\nplows\nchamp\nsixth\nsynod\nroids\nanigh\nforts\natopy\ntired\nskite",
+            "wrongwords.txt" to "stove\nkilos\nalong\nkites\nartis\nthorn\nflags\njonty\nglift\ninvar" +
+                    "\nand\ncontain\nhello\nΔrash\nedt#r\n1nums\nwo rd",
+            "somecandidates.txt" to "STOVE\nkilos\nalong\nkites\nthorn\nflags\nsteal\nburnt\nrains\nafter" +
+                    "\nyoung\nshaft\nsixth\ntired",
+            "wrongcandidates.txt" to "stove\nkilos\nalong\nkites\nthorn\nflags\nsteal\nburnt\nrains\nafter" +
+                    "\nand\ncontain\nhello\nΔrash\nedt#r\n1nums\nwo rd\n12345\nPizza",
+            "addcandidates.txt" to "STOVE\nkilos\nalong\nkites\nthorn\nflags\nsteal\nburnt\nrains\nafter" +
+                    "\nyoung\nshaft\nsixth\ntired\neight\ncharm\nmetro",
+            "oneword1.txt" to "azure",
+            "oneword2.txt" to "could",
+            "oneword3.txt" to "music",
+            "threewords1.txt" to "cover\nguild\ncould",
+            "fourwords1.txt" to "tulip\npoker\nmouse\nmusic"
+        )
+
+        @DynamicTest(order = 1)
+        fun wrongArgumentsTest(): CheckResult {
+            val argsList = listOf(
+                arrayOf(""),
+                arrayOf("words.txt"),
+                arrayOf("words.txt", "candidates.txt", "other.txt")
+            )
+            for (args in argsList) {
+                val co = CheckOutput()
+                co.setArguments(*args)
+                if (!co.start("Error: Wrong number of arguments."))
+                    return CheckResult(false, "Your output should contain \"Error: Wrong number of arguments.\"")
+                if (!co.programIsFinished())
+                    return CheckResult(false, "The application didn't exit.")
+            }
+
+            return CheckResult.correct()
+        }
+
+        @DynamicTest(order = 2, files = "wordFiles")
+        fun noExistFilesTest(): CheckResult {
+
+            var co = CheckOutput()
+            co.setArguments("noexist.txt", "candidates.txt")
+            if (!co.start("Error: The words file noexist.txt doesn't exist."))
+                return CheckResult(false,
+                    "Your output should contain \"The words file noexist.txt doesn't exist.\"")
+            if (!co.programIsFinished())
+                return CheckResult(false, "The application didn't exit.")
+            co = CheckOutput()
+            co.setArguments("somewords.txt", "noexist.txt")
+            if (!co.start("Error: The candidate words file noexist.txt doesn't exist."))
+                return CheckResult(false,
+                    "Your output should contain \"Error: The candidate words file noexist.txt doesn't exist.\"")
+            if (!co.programIsFinished())
+                return CheckResult(false, "The application didn't exit.")
+
+            return CheckResult.correct()
+        }
+
+        @DynamicTest(order = 3, files = "wordFiles")
+        fun invalidWordsTest(): CheckResult {
+            val co = CheckOutput()
+            co.setArguments("wrongwords.txt", "somecandidates.txt")
+            if (!co.start("Error: 7 invalid words were found in the wrongWords.txt file."))
+                return CheckResult(false,
+                    "Wrong error message after input of a words file with invalid words.")
+            if (!co.programIsFinished())
+                return CheckResult(false, "The application didn't exit.")
+
+            return CheckResult.correct()
+        }
+
+        @DynamicTest(order = 4, files = "wordFiles")
+        fun invalidCandidatesTest(): CheckResult {
+            val co = CheckOutput()
+            co.setArguments("somewords.txt", "wrongcandidates.txt")
+            if (!co.start("Error: 9 invalid words were found in the wrongcandidates.txt file."))
+                return CheckResult(false,
+                    "Wrong error message after input of a candidate words file with invalid words.")
+            if (!co.programIsFinished())
+                return CheckResult(false, "The application didn't exit.")
+
+            return CheckResult.correct()
+        }
+
+        @DynamicTest(order = 5, files = "wordFiles")
+        fun additionalCandidatesTest(): CheckResult {
+            val co = CheckOutput()
+            co.setArguments("somewords.txt", "addcandidates.txt")
+            if (!co.start("Error: 3 candidate words are not included in the somewords.txt file."))
+                return CheckResult(false,
+                    "Wrong error message after input of a candidate words file with additional words.")
+            if (!co.programIsFinished())
+                return CheckResult(false, "The application didn't exit.")
+
+            return CheckResult.correct()
+        }
+
+        @DynamicTest(order = 6, files = "wordFiles")
+        fun normalRunTest2(): CheckResult {
+            val co = CheckOutput()
+            co.setArguments("somewords.txt", "somecandidates.txt")
+            if (!co.start("Words Virtuoso"))
+                return CheckResult(false, "Your output should contain \"Words Virtuoso\"")
+            co.stop()
+
+            return CheckResult.correct()
+        }
+
+        @DynamicTest(order = 7, files = "wordFiles")
+        fun wrongInputWordsTest(): CheckResult {
+            val co = CheckOutput()
+            co.setArguments("somewords.txt", "somecandidates.txt")
+            if (!co.start("Words Virtuoso", "Input a 5-letter word:"))
+                return CheckResult(false, "Your output should contain \"Words Virtuoso\"")
+
+            val noFiveLetters = listOf("trains", "One", "Four", "Two Words", "trouvée")
+            noFiveLetters.forEach { input ->
+                if (!co.input(input, "The input isn't a 5-letter word.", "Input a 5-letter word:"))
+                    return CheckResult(false,
+                        "Your output should contain \"The input isn't a 5-letter word." +
+                                "\nInput a 5-letter word:\"")
+            }
+
+            val invalidLetters = listOf("ΗΛΙΟΣ", "étage", "word1", "12345")
+            invalidLetters.forEach { input ->
+                if (!co.input(input, "One or more letters of the input aren't valid.", "Input a 5-letter word:"))
+                    return CheckResult(false,
+                        "Your output should contain \"One or more letters of the input aren't valid." +
+                                "\nInput a 5-letter word:\"")
+            }
+
+            val duplicateLetters = listOf("walls", "hello", "pizza")
+            duplicateLetters.forEach { input ->
+                if (!co.input(input, "The input has duplicate letters.", "Input a 5-letter word:"))
+                    return CheckResult(false,
+                        "Your output should contain \"The input has duplicate letters." +
+                                "\nInput a 5-letter word:\"")
+            }
+
+            if (!co.input("exit", "The game is over."))
+                return CheckResult(false,
+                    "Your output should contain \"The game is over.\"")
+
+            if (!co.programIsFinished())
+                return CheckResult(false, "The application didn't exit.")
+
+            return CheckResult.correct()
+        }
+
+        @DynamicTest(order = 8, files = "wordFiles")
+        fun wordNotInFile(): CheckResult {
+            val co = CheckOutput()
+            co.setArguments("somewords.txt", "somecandidates.txt")
+            if (!co.start("Words Virtuoso", "Input a 5-letter word:"))
+                return CheckResult(false, "Your output should contain \"Words Virtuoso\"")
+
+            val notInFile = listOf("abcde", "KLMNO", "qwert", "AsDfG")
+            notInFile.forEach { input ->
+                if (!co.input(input, "The input word isn't included in my words list.", "Input a 5-letter word:"))
+                    return CheckResult(false,
+                        "Your output should contain \"The input word isn't included in my words list." +
+                                "\nInput a 5-letter word:\"")
+            }
+
+            if (!co.input("exit", "The game is over."))
+                return CheckResult(false,
+                    "Your output should contain \"The game is over.\"")
+
+            if (!co.programIsFinished())
+                return CheckResult(false, "The application didn't exit.")
+
+            return CheckResult.correct()
+        }
+
+        @DynamicTest(order = 9, files = "wordFiles")
+        fun normalRun1File(): CheckResult {
+            val co = CheckOutput()
+            co.setArguments("oneword1.txt", "oneword1.txt")
+            if (!co.start("Words Virtuoso", "Input a 5-letter word:"))
+                return CheckResult(false, "Your output should contain \"Words Virtuoso\"")
+
+            if (!co.input("azure", "Correct!"))
+                return CheckResult(false,
+                    "Your output should contain \"Correct!\"")
+
+            if (!co.programIsFinished())
+                return CheckResult(false, "The application didn't exit.")
+
+            return CheckResult.correct()
+        }
+
+        @DynamicTest(order = 10, files = "wordFiles")
+        fun normalRun2File(): CheckResult {
+            val co = CheckOutput()
+            co.setArguments("threewords1.txt", "oneword2.txt")
+            if (!co.start("Words Virtuoso", "Input a 5-letter word:"))
+                return CheckResult(false, "Your output should contain \"Words Virtuoso\"")
+
+            if (!co.input("cover", "CO___", "Input a 5-letter word:"))
+                return CheckResult(false,
+                    "Your output should contain \"CO___\nInput a 5-letter word:\"")
+
+            if (!co.input("guild", "_u_LD", "Input a 5-letter word:"))
+                return CheckResult(false,
+                    "Your output should contain \"_u_LD\nInput a 5-letter word:\"")
+
+            if (!co.input("could", "Correct!"))
+                return CheckResult(false,
+                    "Correct!")
+
+            if (!co.programIsFinished())
+                return CheckResult(false, "The application didn't exit.")
+
+            return CheckResult.correct()
+        }
+
+        @DynamicTest(order = 11, files = "wordFiles")
+        fun normalRun3File(): CheckResult {
+            val co = CheckOutput()
+            co.setArguments("fourwords1.txt", "oneword3.txt")
+            if (!co.start("Words Virtuoso", "Input a 5-letter word:"))
+                return CheckResult(false, "Your output should contain \"Words Virtuoso\"")
+
+            if (!co.input("mouse", "M_us_", "Input a 5-letter word:"))
+                return CheckResult(false,
+                    "Your output should contain \"M_us_\nInput a 5-letter word:\"")
+
+            if (!co.input("poker", "_____", "Input a 5-letter word:"))
+                return CheckResult(false,
+                    "Your output should contain \"_____\nInput a 5-letter word:\"")
+
+            if (!co.input("tulip", "_U_I_", "Input a 5-letter word:"))
+                return CheckResult(false,
+                    "Your output should contain \"_U_I_\nInput a 5-letter word:\"")
+
+            if (!co.input("music", "Correct!"))
+                return CheckResult(false,
+                    "Correct!")
+
+            if (!co.programIsFinished())
+                return CheckResult(false, "The application didn't exit.")
+
+            return CheckResult.correct()
+        }
+
+        @DynamicTest(order = 12, files = "wordFiles")
+        fun checkIfWordsRandomFile(): CheckResult {
+            val words = listOf("cover", "guild", "could")
+            val counts = IntArray(3)
+
+            repeat(15) {
+                val co = CheckOutput()
+                co.setArguments("threewords1.txt", "threewords1.txt")
+                co.start("Words Virtuoso", "Input a 5-letter word:")
+
+                for ((index, word) in words.withIndex()) {
+                    if (co.input(word, "Correct!")) {
+                        counts[index]++
+                        break
+                    }
+                }
+            }
+
+            if (counts[0] * counts[1] * counts[2] == 0)
+                return CheckResult(false, "Words aren't random chosen.")
+
+            return CheckResult.correct()
+        }
+    }
+
+    class CheckOutput {
+        private var main: TestedProgram = TestedProgram()
+        var position = 0
+        private var caseInsensitive = true
+        private var trimOutput = true
+        private val arguments= mutableListOf<String>()
+        private var isStarted = false
+        private var lastOutput = ""
+
+        private fun checkOutput(outputString: String, vararg checkStr: String): Boolean {
+            var searchPosition = position
+            for (cStr in checkStr) {
+                val str = if (caseInsensitive) cStr.lowercase() else cStr
+                val findPosition = outputString.indexOf(str, searchPosition)
+                if (findPosition == -1) return false
+                if ( outputString.substring(searchPosition until findPosition).isNotBlank() ) return false
+                searchPosition = findPosition + str.length
+            }
+            position = searchPosition
+            return true
+        }
+
+        fun start(vararg checkStr: String): Boolean {
+            return if (!isStarted) {
+                var outputString = main.start(*arguments.toTypedArray())
+                lastOutput = outputString
+                if (trimOutput) outputString = outputString.trim()
+                if (caseInsensitive) outputString = outputString.lowercase()
+                isStarted = true
+                checkOutput(outputString, *checkStr)
+            } else false
+        }
+
+        fun stop() {
+            main.stop()
+        }
+
+        fun input(input: String, vararg checkStr: String): Boolean {
+            if (main.isFinished) return false
+            var outputString = main.execute(input)
+            lastOutput = outputString
+            if (trimOutput) outputString = outputString.trim()
+            if (caseInsensitive) outputString = outputString.lowercase()
+            position = 0
+            return checkOutput(outputString, *checkStr)
+        }
+
+        fun inputNext(vararg checkStr: String): Boolean {
+            var outputString = lastOutput
+            if (trimOutput) outputString = outputString.trim()
+            if (caseInsensitive) outputString = outputString.lowercase()
+            return checkOutput(outputString, *checkStr)
+        }
+
+        fun getNextOutput(input: String): String {
+            if (main.isFinished) return ""
+            val outputString = main.execute(input)
+            lastOutput = outputString
+            position = 0
+            return  outputString
+        }
+
+        fun getLastOutput(): String { return lastOutput }
+        fun programIsFinished(): Boolean  = main.isFinished
+        fun setArguments(vararg args: String) { arguments.addAll(args.toMutableList()) }
+        fun setCaseSensitivity(caseInsensitive: Boolean) { this.caseInsensitive = caseInsensitive }
+        fun setOutputTrim(trimOutput: Boolean) { this.trimOutput = trimOutput}
+    }
+  learner_created: false
+- name: test.txt
+  visible: true
+  learner_created: true
+- name: src/wordsvirtuoso/ConsoleManager.kt
+  visible: true
+  text: |-
+    package wordsvirtuoso
+
+    import wordsvirtuoso.config.ArgumentsConfig
+    import wordsvirtuoso.wordsReader.WordsFileReader
+    import java.lang.RuntimeException
+    import kotlin.system.exitProcess
+
+    class ConsoleManager {
+
+        fun startGame(args: Array<String>) {
+            try {
+                val reader = WordsFileReader(ArgumentsConfig(args))
+                val words = reader.readWords()
+                val candidates = reader.readCandidates()
+                val wordsPassed = CheckDictionary().checkList(words)
+                val candidatesPassed = CheckDictionary().checkList(candidates)
+                val candidatesValid = CheckDictionary().checkWordsContain(candidates, words)
+                if (wordsPassed && candidatesPassed && candidatesValid) println("Words Virtuoso")
+                else println("Unknown error")
+            } catch (e: RuntimeException) {
+                println(e.message)
+                exitProcess(-1)
+            }
+        }
+
+    }
+  learner_created: true
+- name: invalidWords.txt
+  visible: true
+  text: |-
+    bridge
+    set
+    hello
+    ήλιος
+    VÊTÎT
+  learner_created: true
+- name: src/wordsvirtuoso/config/ArgumentsConfig.kt
+  visible: true
+  text: |-
+    package wordsvirtuoso.config
+
+    class ArgumentsConfig(params: Array<String>) : Config {
+
+        private var allWordsPath = ""
+        private var candidatesPath = ""
+
+        init {
+            if (params.size != 2) throw IllegalArgumentException("Error: Wrong number of arguments.")
+            for (param in params) {
+                allWordsPath = Regex(".*?words.+").matchEntire(param)?.value ?: params[0]
+                candidatesPath = Regex(".*?candidates.+").matchEntire(param)?.value ?: params[1]
+                if (allWordsPath.isEmpty() || candidatesPath.isEmpty()) throw IllegalStateException("Cant parse parameters.")
+            }
+        }
+
+        override fun getWordsPath(): String = allWordsPath
+
+        override fun getCandidatesPath(): String = candidatesPath
+    }
+  learner_created: true
+- name: src/wordsvirtuoso/config/Config.kt
+  visible: true
+  text: |-
+    package wordsvirtuoso.config
+
+    interface Config {
+
+        fun getWordsPath():String
+
+        fun getCandidatesPath():String
+
+    }
+  learner_created: true
+- name: src/wordsvirtuoso/dictionaryVerifications/verifications/DuplicateVerification.kt
+  visible: true
+  text: |-
+    package wordsvirtuoso.verifications
+
+    import wordsvirtuoso.verifications.data.Request
+
+    class DuplicateVerification : VerificationsChain {
+
+        private lateinit var nextChain: VerificationsChain
+
+        override fun nextChain(chain: VerificationsChain) {
+            this.nextChain = chain
+        }
+
+        override fun verify(request: Request) {
+            val uniques = mutableListOf<Char>()
+            request.word.forEach {
+                if (uniques.contains(it)) throw IllegalArgumentException("The input has duplicate letters.")
+                else uniques.add(it)
+            }
+            nextChain.verify(request)
+        }
+    }
+  learner_created: true
+- name: src/wordsvirtuoso/dictionaryVerifications/verifications/EnglishVerification.kt
+  visible: true
+  text: |-
+    package wordsvirtuoso.verifications
+
+    import wordsvirtuoso.verifications.data.Request
+    import java.lang.IllegalStateException
+
+    class EnglishVerification : VerificationsChain {
+
+        private lateinit var nextChain: VerificationsChain
+
+        override fun nextChain(chain: VerificationsChain) {
+            this.nextChain = chain
+        }
+
+        override fun verify(request: Request) {
+            if (request.word.contains(Regex("[^A-Za-z]"))) throw IllegalArgumentException("The input has invalid characters.")
+            nextChain.verify(request)
+        }
+    }
+  learner_created: true
+- name: src/wordsvirtuoso/dictionaryVerifications/verifications/LengthVerification.kt
+  visible: true
+  text: |-
+    package wordsvirtuoso.verifications
+
+    import wordsvirtuoso.verifications.data.Request
+
+    /**
+     * Verifies input word length.
+     */
+    class LengthVerification : VerificationsChain {
+
+        private lateinit var nextChain: VerificationsChain
+
+        override fun nextChain(chain: VerificationsChain) {
+            this.nextChain = chain
+        }
+
+        /**
+         * Verify that input word must be 5 chars length.
+         */
+        override fun verify(request: Request) {
+            if (request.word.length != 5) throw IllegalArgumentException("The input isn't a 5-letter string.")
+            nextChain.verify(request)
+        }
+
+
+    }
+  learner_created: true
+- name: src/wordsvirtuoso/dictionaryVerifications/verifications/VerificationsChain.kt
+  visible: true
+  text: |-
+    package wordsvirtuoso.verifications
+
+    import wordsvirtuoso.verifications.data.Request
+
+    interface VerificationsChain {
+
+        fun nextChain(chain: VerificationsChain)
+
+        fun verify(request: Request)
+
+    }
+  learner_created: true
+- name: src/wordsvirtuoso/dictionaryVerifications/verifications/VerifyRunner.kt
+  visible: true
+  text: |-
+    package wordsvirtuoso.verifications
+
+    import wordsvirtuoso.verifications.data.Request
+
+    /**
+     * Run all possible verifications.
+     * @throws IllegalArgumentException if some verification fails.
+     * Check message.
+     */
+    class VerifyRunner {
+
+        fun verify(word: String) {
+            val request = Request(word) // Create verification request.
+
+            // Create chain items.
+            val initStep = LengthVerification()
+            val englishStep = EnglishVerification()
+            val duplicateStep = DuplicateVerification()
+
+            // Create chain.
+            initStep.nextChain(englishStep)
+            englishStep.nextChain(duplicateStep)
+
+            // Execute chain from init step.
+            initStep.verify(request)
+        }
+    }
+  learner_created: true
+- name: src/wordsvirtuoso/dictionaryVerifications/verifications/data/Request.kt
+  visible: true
+  text: |-
+    package wordsvirtuoso.verifications.data
+
+    /**
+     * Object which is transferred between all verifications.
+     * @param word Verification resource.
+     */
+    class Request(val word: String) {
+
+    }
+  learner_created: true
+- name: src/wordsvirtuoso/dictionaryVerifications/wordsReader/Dictionary.kt
+  visible: true
+  text: |-
+    package wordsvirtuoso.wordsReader
+
+    data class Dictionary(val name: String, val value: List<String>)
+  learner_created: true
+- name: src/wordsvirtuoso/dictionaryVerifications/wordsReader/Manager.kt
+  visible: true
+  text: |-
+    package wordsvirtuoso.wordsReader
+
+    import wordsvirtuoso.verifications.VerifyRunner
+    import java.nio.file.FileSystemNotFoundException
+
+    class Manager(private val reader: WordsReader) {
+
+
+
+
+    }
+  learner_created: true
+- name: src/wordsvirtuoso/dictionaryVerifications/wordsReader/WordsFileReader.kt
+  visible: true
+  text: |-
+    package wordsvirtuoso.wordsReader
+
+    import wordsvirtuoso.config.Config
+    import java.io.File
+    import java.nio.file.FileSystemNotFoundException
+
+    class WordsFileReader(private val config: Config) : WordsReader {
+
+        override fun readWords(): Dictionary {
+            val wordsFile = File(config.getWordsPath())
+            if (wordsFile.exists()) return Dictionary(config.getWordsPath(), wordsFile.readLines())
+            else throw FileSystemNotFoundException("Error: The words file ${config.getWordsPath()} doesn't exist.")
+        }
+
+        override fun readCandidates(): Dictionary {
+            val candidatesFile = File(config.getCandidatesPath())
+            if (candidatesFile.exists()) return Dictionary(config.getCandidatesPath(), candidatesFile.readLines())
+            else throw FileSystemNotFoundException("Error: The candidate words file ${config.getCandidatesPath()} doesn't exist.")
+        }
+
+    }
+  learner_created: true
+- name: src/wordsvirtuoso/dictionaryVerifications/wordsReader/WordsReader.kt
+  visible: true
+  text: |-
+    package wordsvirtuoso.wordsReader
+
+    interface WordsReader {
+
+        fun readWords(): Dictionary
+
+        fun readCandidates(): Dictionary
+
+    }
+  learner_created: true
+- name: src/wordsvirtuoso/dictionaryVerifications/CheckDictionary.kt
+  visible: true
+  text: |-
+    package wordsvirtuoso
+
+    import wordsvirtuoso.wordsReader.Dictionary
+    import java.lang.IllegalStateException
+    import java.util.LinkedList
+
+    class CheckDictionary {
+
+        fun checkWordsContain(candidates: Dictionary, allWords: Dictionary): Boolean {
+            var errorsScore = 0
+            val wordsL = allWords.value.stream().map { it.lowercase() }.toList()
+            val candidatesL = candidates.value.stream().map { it.lowercase() }
+            candidatesL.forEach { if (!wordsL.contains(it)) errorsScore++ }
+            return if (errorsScore == 0) true
+            else throw IllegalStateException("Error: $errorsScore candidate words are not included in the ${allWords.name} file.")
+        }
+
+        fun checkList(dictionary: Dictionary): Boolean {
+            var errorsScore = 0
+            dictionary.value.forEach { if (!CheckWord(it).isValid()) errorsScore++ }
+            return if (errorsScore == 0) true
+            else throw IllegalStateException("Error: $errorsScore invalid words were found in the ${dictionary.name} file.")
+        }
+
+    }
+  learner_created: true
+- name: src/wordsvirtuoso/dictionaryVerifications/CheckWord.kt
+  visible: true
+  text: |-
+    package wordsvirtuoso
+
+    import wordsvirtuoso.verifications.VerifyRunner
+
+    class CheckWord(private val word: String) {
+
+        fun isValid(): Boolean {
+            try {
+                VerifyRunner().verify(word)
+            } catch (e: IllegalArgumentException) {
+                return false
+            } catch (e: UninitializedPropertyAccessException) {
+                return true
+            }
+            return true
+        }
+
+    }
+  learner_created: true
+- name: src/wordsvirtuoso/gameVerifications/GuessStringVerifications.kt
+  visible: true
+  learner_created: true
+- name: src/wordsvirtuoso/dictionaryVerifications/GameBuilder.kt
+  visible: true
+  learner_created: true
+- name: src/wordsvirtuoso/gameVerifications/GameData.kt
+  visible: true
+  learner_created: true
+- name: src/wordsvirtuoso/gameVerifications/ClueCalculator.kt
+  visible: true
+  learner_created: true
+feedback_link: https://hyperskill.org/learn/step/22748#comment
+status: Failed
+feedback:
+  message: |-
+    Wrong answer in test #7
+
+    Your output should contain &quot;One or more letters of the input aren&#39;t valid.
+    Input a 5-letter word:&quot;
+
+    Please find below the output of your program during this failed test.
+    Note that the &#39;&gt;&#39; character indicates the beginning of the input line.
+
+    ---
+
+    Arguments: somewords.txt somecandidates.txt
+
+    Words Virtuoso
+
+    Input a 5-letter word:
+    &gt; trains
+    The input isn&#39;t a 5-letter word.
+
+    Input a 5-letter word:
+    &gt; One
+    The input isn&#39;t a 5-letter word.
+
+    Input a 5-letter word:
+    &gt; Four
+    The input isn&#39;t a 5-letter word.
+
+    Input a 5-letter word:
+    &gt; Two Words
+    The input isn&#39;t a 5-letter word.
+
+    Input a 5-letter word:
+    &gt; trouvée
+    The input isn&#39;t a 5-letter word.
+
+    Input a 5-letter word:
+    &gt; ΗΛΙΟΣ
+    _____
+
+    Input a 5-letter word:
+  time: "Fri, 09 Jun 2023 08:05:43 UTC"
+record: -1
