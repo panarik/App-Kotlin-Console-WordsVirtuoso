@@ -17,7 +17,7 @@ class EnglishVerification : VerificationsChain {
     }
 
     override fun verify(request: Request) {
-        if (request.word.contains(Regex("[^A-Za-z]"))) throw IllegalArgumentException("The input has invalid characters.")
+        if (request.word.contains(Regex("[^A-Za-z]"))) throw IllegalArgumentException(errorMessage)
         nextChain.verify(request)
     }
 }

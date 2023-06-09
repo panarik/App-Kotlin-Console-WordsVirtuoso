@@ -22,7 +22,9 @@ class LengthVerification : VerificationsChain {
      * Verify that input word must be 5 chars length.
      */
     override fun verify(request: Request) {
-        if (request.word.length != 5) throw IllegalArgumentException(errorMessage)
+        if (request.word.length != 5) {
+            throw IllegalArgumentException(errorMessage)
+        }
         nextChain.verify(request)
     }
 
