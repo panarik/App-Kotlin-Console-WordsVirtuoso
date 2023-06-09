@@ -1,6 +1,7 @@
 package wordsvirtuoso.dictionaryVerifications
 
 import wordsvirtuoso.dictionaryVerifications.wordsReader.Dictionary
+import wordsvirtuoso.wordRunner.VerifyDictionaryRunner
 import java.lang.IllegalStateException
 
 class CheckDictionary {
@@ -16,7 +17,7 @@ class CheckDictionary {
 
     fun checkList(dictionary: Dictionary): Boolean {
         var errorsScore = 0
-        dictionary.value.forEach { if (!CheckWord(it).isValid()) errorsScore++ }
+        dictionary.value.forEach { if (!CheckWord(it, VerifyDictionaryRunner()).isValid()) errorsScore++ }
         return if (errorsScore == 0) true
         else throw IllegalStateException("Error: $errorsScore invalid words were found in the ${dictionary.name} file.")
     }

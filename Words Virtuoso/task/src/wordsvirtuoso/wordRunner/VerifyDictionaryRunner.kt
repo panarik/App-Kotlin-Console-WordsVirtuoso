@@ -1,5 +1,8 @@
-package wordsvirtuoso.dictionaryVerifications.verifications
+package wordsvirtuoso.wordRunner
 
+import wordsvirtuoso.dictionaryVerifications.verifications.DuplicateVerification
+import wordsvirtuoso.dictionaryVerifications.verifications.EnglishVerification
+import wordsvirtuoso.dictionaryVerifications.verifications.LengthVerification
 import wordsvirtuoso.dictionaryVerifications.verifications.data.Request
 
 /**
@@ -7,9 +10,9 @@ import wordsvirtuoso.dictionaryVerifications.verifications.data.Request
  * @throws IllegalArgumentException if some verification fails.
  * Check message.
  */
-class VerifyRunner {
+class VerifyDictionaryRunner : VerifyRunner {
 
-    fun verify(word: String) {
+    override fun verify(word: String) {
         val request = Request(word) // Create verification request.
 
         // Create chain items.

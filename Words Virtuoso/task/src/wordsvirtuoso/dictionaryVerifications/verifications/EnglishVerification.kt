@@ -6,6 +6,11 @@ import java.lang.IllegalStateException
 class EnglishVerification : VerificationsChain {
 
     private lateinit var nextChain: VerificationsChain
+    private var errorMessage = "The input has invalid characters."
+
+    override fun setErrorMessage(message: String) {
+        errorMessage = message
+    }
 
     override fun nextChain(chain: VerificationsChain) {
         this.nextChain = chain

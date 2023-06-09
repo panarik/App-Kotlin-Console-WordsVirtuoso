@@ -1,12 +1,12 @@
 package wordsvirtuoso.dictionaryVerifications
 
-import wordsvirtuoso.dictionaryVerifications.verifications.VerifyRunner
+import wordsvirtuoso.wordRunner.VerifyRunner
 
-class CheckWord(private val word: String) {
+class CheckWord(private val word: String, val runner:VerifyRunner) {
 
     fun isValid(): Boolean {
         try {
-            VerifyRunner().verify(word)
+            runner.verify(word)
         } catch (e: IllegalArgumentException) {
             return false
         } catch (e: UninitializedPropertyAccessException) {
