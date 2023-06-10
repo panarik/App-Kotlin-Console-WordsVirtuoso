@@ -14,18 +14,17 @@ class GameStage(private val gameData: GameData) {
      */
     fun runStage(): String {
         UserActionVerifications(gameData).verify() // InterruptedException
-        GameStateVerifications(gameData).verify() // InterruptedException
         CheckWord(gameData.input, VerifyGuessStringRunner(gameData)).verify() // IllegalArgumentException
         ClueCalculator(gameData).calculateClue()
+        GameStateVerifications(gameData).verify() // InterruptedException
         return endStepMessage()
     }
 
     private fun endStepMessage(): String {
         val messageBuilder = StringBuilder()
-        messageBuilder.append(getWrongGuessList())
+        messageBuilder.append("${gameData.getGuessedAttempts()}\n")
+        messageBuilder.append("\n")
+        messageBuilder.append("${gameData.getUniqueWrongLetters()}\n")
         return messageBuilder.toString()
     }
-
-    private fun getWrongGuessList(): String =
-        gameData.wrongGuessList.joinToString("\n")
 }

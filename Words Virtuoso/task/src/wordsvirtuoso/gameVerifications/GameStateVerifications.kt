@@ -2,7 +2,7 @@ package wordsvirtuoso.gameVerifications
 
 import wordsvirtuoso.gameVerifications.data.GameData
 
-class GameStateVerifications(val gameData: GameData) {
+class GameStateVerifications(private val gameData: GameData) {
 
     fun verify() {
         if (isWon(gameData.input)) throw InterruptedException(endGameMessage())
@@ -12,12 +12,13 @@ class GameStateVerifications(val gameData: GameData) {
 
     private fun endGameMessage(): String {
         val message = StringBuilder()
-        message.append("Correct!\n")
-        if (gameData.wrongGuessList.size == 0) {
+        message.append("\n${gameData.getGuessedAttempts()}")
+        message.append("\n\nCorrect!\n")
+        if (gameData.guessedAttempts.size < 2) {
             message.append("Amazing luck! The solution was found at once.")
         } else {
             message.append(
-                "The solution was found after ${gameData.wrongGuessList.size} tries in ${
+                "The solution was found after ${gameData.guessedAttempts.size} tries in ${
                     (System.currentTimeMillis() - gameData.startTime) / 1000
                 } seconds."
             )

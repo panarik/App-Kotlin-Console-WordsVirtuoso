@@ -9,21 +9,26 @@ class ClueCalculator(private val gameData: GameData) {
         val input = gameData.input
         val clue = "_____".toMutableList()
         for (inputIndex in input.indices) {
+            val inputChar = input[inputIndex]
             when {
 
-                // Same position case.
-                secret[inputIndex] == input[inputIndex] -> {
-                    clue[inputIndex] = input[inputIndex].uppercaseChar()
+                // is same position case.
+                secret[inputIndex] == inputChar -> {
+                    clue[inputIndex] = inputChar.uppercaseChar()
                 }
 
-                // Not a same position case.
-                secret.contains(input[inputIndex]) -> {
-                    clue[inputIndex] = input[inputIndex].lowercaseChar()
+                // is not a same position case.
+                secret.contains(inputChar) -> {
+                    val currentLetter = inputChar.lowercaseChar()
+                    clue[inputIndex] = currentLetter
                 }
+
+                // is completely missed letter.
+                else -> gameData.wrongLetters.add(inputChar.uppercaseChar())
             }
         }
         gameData.clue = clue.joinToString("")
-        gameData.wrongGuessList.add(gameData.clue)
+        gameData.guessedAttempts.add(gameData.clue)
     }
 
 }
