@@ -1,6 +1,7 @@
 package wordsvirtuoso.gameVerifications
 
 import wordsvirtuoso.dictionaryVerifications.CheckWord
+import wordsvirtuoso.gameVerifications.data.GameData
 import wordsvirtuoso.wordRunner.VerifyGuessStringRunner
 
 class GuessStringVerifications(private val gameData: GameData) {
@@ -20,6 +21,6 @@ class GuessStringVerifications(private val gameData: GameData) {
     private fun isWon(input: String): Boolean = input == gameData.secretWord
 
     private fun isHaveErrors(input: String): String? =
-        CheckWord(input, VerifyGuessStringRunner()).verify()
+        CheckWord(input, VerifyGuessStringRunner(gameData)).verify()
 
 }

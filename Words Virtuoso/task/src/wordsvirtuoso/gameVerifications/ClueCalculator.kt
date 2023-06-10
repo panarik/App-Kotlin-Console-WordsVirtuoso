@@ -1,5 +1,7 @@
 package wordsvirtuoso.gameVerifications
 
+import wordsvirtuoso.gameVerifications.data.GameData
+
 class ClueCalculator(private val gameData: GameData) {
 
     fun calculateClue(): String {

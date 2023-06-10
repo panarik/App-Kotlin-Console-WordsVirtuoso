@@ -8,7 +8,7 @@ fun main(args: Array<String>) {
     val words = gameBuilder.getWordsList()
     val candidates = gameBuilder.getCandidatesList()
 
-    ConsoleManager().startGame(candidates)
+    ConsoleManager().startGame(candidates, words)
 }
 
 

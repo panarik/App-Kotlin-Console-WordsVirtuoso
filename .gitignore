@@ -4,6 +4,7 @@ build
 Topics
 *.yaml
 *.html
+.txt
 
 # Project exclude paths
 /Words Virtuoso/task/out/
