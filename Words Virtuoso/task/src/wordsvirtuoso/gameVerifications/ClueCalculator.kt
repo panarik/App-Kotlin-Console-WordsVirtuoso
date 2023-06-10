@@ -4,10 +4,10 @@ import wordsvirtuoso.gameVerifications.data.GameData
 
 class ClueCalculator(private val gameData: GameData) {
 
-    fun calculateClue(): String {
+    fun calculateClue() {
         val secret = gameData.secretWord
         val input = gameData.input
-        val clue = gameData.clue.toMutableList()
+        val clue = "_____".toMutableList()
         for (inputIndex in input.indices) {
             when {
 
@@ -20,12 +20,10 @@ class ClueCalculator(private val gameData: GameData) {
                 secret.contains(input[inputIndex]) -> {
                     clue[inputIndex] = input[inputIndex].lowercaseChar()
                 }
-
-                else -> gameData.clue
             }
         }
         gameData.clue = clue.joinToString("")
-        return gameData.clue
+        gameData.wrongGuessList.add(gameData.clue)
     }
 
 }

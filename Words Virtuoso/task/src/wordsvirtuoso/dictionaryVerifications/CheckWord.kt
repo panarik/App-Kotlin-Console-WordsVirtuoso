@@ -4,6 +4,17 @@ import wordsvirtuoso.wordRunner.VerifyRunner
 
 class CheckWord(private val word: String, private val runner: VerifyRunner) {
 
+    /**
+     * Throws exception.
+     */
+    fun verify() {
+        try {
+            runner.verify(word)
+        } catch (e: UninitializedPropertyAccessException) {
+            return
+        }
+    }
+
     fun isValid(): Boolean {
         try {
             runner.verify(word)
@@ -15,18 +26,5 @@ class CheckWord(private val word: String, private val runner: VerifyRunner) {
         return true
     }
 
-    /**
-     * Returns error message if error was cached. Otherwise, returns null.
-     */
-    fun verify(): String? {
-        try {
-            runner.verify(word)
-        } catch (e: IllegalArgumentException) {
-            return e.message
-        } catch (e: UninitializedPropertyAccessException) {
-            return null
-        }
-        return null
-    }
 
 }
