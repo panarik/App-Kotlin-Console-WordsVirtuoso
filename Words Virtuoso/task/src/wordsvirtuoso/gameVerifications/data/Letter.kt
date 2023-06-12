@@ -1,6 +1,6 @@
 package wordsvirtuoso.gameVerifications.data
 
-data class Letter(val label: Char, val value: String) {
+data class Letter(val label: Char, val color: Color) {
 
     override fun hashCode(): Int {
         return label.hashCode()
